@@ -80,4 +80,30 @@ class ProductsService extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  Future<String?> uploadImage() async {
+    if (newPictureFile == null) return null;
+    isUpdated = true;
+    notifyListeners();
+
+    final url = Uri.parse(
+        'https://api.cloudinary.com/v1_1/dfhbhzd9q/image/upload?upload_preset=ml_default');
+
+    final imageUploadRequest = http.MultipartRequest('POST', url);
+
+    final file =
+        await http.MultipartFile.fromPath('file', newPictureFile!.path);
+
+    imageUploadRequest.files.add(file);
+    final streamResponse = await imageUploadRequest.send();
+    final res = await http.Response.fromStream(streamResponse);
+
+    if (res.statusCode != 200 && res.statusCode != 201) {
+      // Algo Salio Al subir imagen a Cloudinary
+      return null;
+    }
+    newPictureFile = null;
+    final decodeData = json.decode(res.body);
+    return decodeData['secure_url'];
+  }
 }
