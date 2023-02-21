@@ -29,6 +29,8 @@ class _ProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final productForm = Provider.of<ProductFormProvider>(context);
+
     return Scaffold(
       body: SingleChildScrollView(
         // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -61,8 +63,12 @@ class _ProductScreen extends StatelessWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton:
-          FloatingActionButton(child: const Icon(Icons.save), onPressed: () {}),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.save),
+          onPressed: () async {
+            if (!productForm.isValidForm()) return;
+            await productService.saveOrCreateProdcut(productForm.product);
+          }),
     );
   }
 }
@@ -82,45 +88,49 @@ class _ProductForm extends StatelessWidget {
         width: double.infinity,
         decoration: _buildBoxDecoration(),
         child: Form(
+            key: producForm.formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
-          children: [
-            const SizedBox(height: 10),
-            TextFormField(
-              initialValue: product.name,
-              onChanged: (value) => product.name = value,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'El nombre es Obligatorio';
-                }
-              },
-              decoration: InputDecorations.authInputDecoration(
-                  hintText: 'Nombre del Producto', labelText: 'Nombre'),
-            ),
-            const SizedBox(height: 30),
-            TextFormField(
-              initialValue: '${product.price}',
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}'))
+              children: [
+                const SizedBox(height: 10),
+                TextFormField(
+                  initialValue: product.name,
+                  onChanged: (value) => product.name = value,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'El nombre es Obligatorio';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecorations.authInputDecoration(
+                      hintText: 'Nombre del Producto', labelText: 'Nombre'),
+                ),
+                const SizedBox(height: 30),
+                TextFormField(
+                  initialValue: '${product.price}',
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^(\d+)?\.?\d{0,2}'))
+                  ],
+                  onChanged: (value) {
+                    if (double.tryParse(value) == null) {
+                      product.price = 0;
+                    } else {
+                      product.price = double.parse(value);
+                    }
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecorations.authInputDecoration(
+                      hintText: '\$150', labelText: 'Precio:'),
+                ),
+                const SizedBox(height: 30),
+                SwitchListTile.adaptive(
+                    value: product.available,
+                    title: const Text('Disponible'),
+                    onChanged: producForm.updateaAvailability),
+                const SizedBox(height: 30)
               ],
-              onChanged: (value) {
-                if (double.tryParse(value) == null) {
-                  product.price = 0;
-                } else {
-                  product.price = double.parse(value);
-                }
-              },
-              keyboardType: TextInputType.number,
-              decoration: InputDecorations.authInputDecoration(
-                  hintText: '\$150', labelText: 'Precio:'),
-            ),
-            const SizedBox(height: 30),
-            SwitchListTile.adaptive(
-                value: product.available,
-                title: const Text('Disponible'),
-                onChanged: producForm.updateaAvailability),
-            const SizedBox(height: 30)
-          ],
-        )),
+            )),
       ),
     );
   }

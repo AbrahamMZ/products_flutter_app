@@ -9,6 +9,7 @@ class ProductsService extends ChangeNotifier {
   final List<Product> products = [];
   late Product selectedProduct;
   bool isLoading = true;
+  bool isUpdated = false;
 
   ProductsService() {
     loadProducts();
@@ -33,5 +34,29 @@ class ProductsService extends ChangeNotifier {
     notifyListeners();
 
     return products;
+  }
+
+  Future saveOrCreateProdcut(Product product) async {
+    isUpdated = true;
+    notifyListeners();
+
+    if (product.id == null) {
+      // crear
+    } else {
+      await updateProduct(product);
+    }
+
+    isUpdated = false;
+    notifyListeners();
+  }
+
+  Future<String> updateProduct(Product product) async {
+    final url = Uri.https(_baseUrl, 'products/${product.id}.json');
+    final res = await http.put(url, body: product.toRawJson());
+
+    final index = products.indexWhere((element) => element.id == product.id);
+    products[index] = product;
+
+    return product.id!;
   }
 }
