@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:products_app/models/models.dart';
@@ -8,6 +9,8 @@ class ProductsService extends ChangeNotifier {
   final String _baseUrl = 'flutter-backend-960e2-default-rtdb.firebaseio.com';
   final List<Product> products = [];
   late Product selectedProduct;
+  File? newPictureFile;
+
   bool isLoading = true;
   bool isUpdated = false;
 
@@ -69,5 +72,12 @@ class ProductsService extends ChangeNotifier {
     products.add(product);
 
     return product.id!;
+  }
+
+  void previewSelectedProductImage(String path) {
+    selectedProduct.picture = path;
+    newPictureFile = File.fromUri(Uri(path: path));
+
+    notifyListeners();
   }
 }

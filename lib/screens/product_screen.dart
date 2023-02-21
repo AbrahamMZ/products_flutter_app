@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:products_app/providers/providers.dart';
 import 'package:products_app/ui/input_decorations.dart';
@@ -54,7 +55,30 @@ class _ProductScreen extends StatelessWidget {
                     child: IconButton(
                         icon: const Icon(Icons.camera_alt,
                             size: 40, color: Colors.white),
-                        onPressed: () => {}))
+                        onPressed: () async {
+                          final ImagePicker picker = ImagePicker();
+                          // Pick an image
+                          final XFile? image = await picker.pickImage(
+                              source: ImageSource.camera, imageQuality: 100);
+
+                          if (image == null) return;
+
+                          productService
+                              .previewSelectedProductImage(image.path);
+
+                          // Capture a photo
+                          // final XFile? photo = await picker.pickImage(
+                          //     source: ImageSource.camera);
+                          // Pick a video
+                          // final XFile? image = await picker.pickVideo(
+                          //     source: ImageSource.gallery);
+                          // Capture a video
+                          // final XFile? video = await picker.pickVideo(
+                          //     source: ImageSource.camera);
+                          // Pick multiple images
+                          // final List<XFile>? images =
+                          //     await picker.pickMultiImage();
+                        }))
               ],
             ),
             const _ProductForm(),
