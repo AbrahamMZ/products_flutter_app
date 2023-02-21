@@ -36,12 +36,12 @@ class ProductsService extends ChangeNotifier {
     return products;
   }
 
-  Future saveOrCreateProdcut(Product product) async {
+  Future saveOrCreateProduct(Product product) async {
     isUpdated = true;
     notifyListeners();
 
     if (product.id == null) {
-      // crear
+      await createProduct(product);
     } else {
       await updateProduct(product);
     }
@@ -52,10 +52,21 @@ class ProductsService extends ChangeNotifier {
 
   Future<String> updateProduct(Product product) async {
     final url = Uri.https(_baseUrl, 'products/${product.id}.json');
-    final res = await http.put(url, body: product.toRawJson());
+    await http.put(url, body: product.toRawJson());
 
     final index = products.indexWhere((element) => element.id == product.id);
     products[index] = product;
+
+    return product.id!;
+  }
+
+  Future<String> createProduct(Product product) async {
+    final url = Uri.https(_baseUrl, 'products.json');
+    final res = await http.post(url, body: product.toRawJson());
+    final decodeData = json.decode(res.body);
+
+    product.id = decodeData['name'];
+    products.add(product);
 
     return product.id!;
   }
