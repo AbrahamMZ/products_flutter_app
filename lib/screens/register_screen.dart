@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:products_app/providers/login_form_provider.dart';
+import 'package:products_app/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
 import 'package:products_app/ui/input_decorations.dart';
 import 'package:products_app/widgets/widgets.dart';
 
-import '../services/services.dart';
-
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,7 @@ class LoginScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 10),
-                  Text('Login',
+                  Text('Crear Cuenta',
                       style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 30),
                   ChangeNotifierProvider(
@@ -37,12 +36,12 @@ class LoginScreen extends StatelessWidget {
             ),
             TextButton(
                 onPressed: () =>
-                    Navigator.pushReplacementNamed(context, 'register'),
+                    Navigator.pushReplacementNamed(context, 'login'),
                 style: ButtonStyle(
                     overlayColor: MaterialStateProperty.all(
                         Colors.indigo.withOpacity(0.1)),
                     shape: MaterialStateProperty.all(const StadiumBorder())),
-                child: const Text('Crear una nueva cuenta')),
+                child: const Text('¿Ya Cuenta con una Cuenta?')),
             const SizedBox(height: 50)
           ],
         ),
@@ -110,7 +109,9 @@ class _LoginForm extends StatelessWidget {
                       if (!loginForm.isValidForm()) return;
 
                       loginForm.isLoading = true;
-                      final String? response = await authService.login(
+                      // ignore: todo
+                      // TODO: Validar el Login
+                      final String? response = await authService.createUser(
                           loginForm.email, loginForm.password);
 
                       if (response == null) {
