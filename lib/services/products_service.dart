@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:products_app/models/models.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+
+import 'package:products_app/models/models.dart';
 
 class ProductsService extends ChangeNotifier {
   final String _baseUrl = 'flutter-backend-960e2-default-rtdb.firebaseio.com';
@@ -14,6 +16,8 @@ class ProductsService extends ChangeNotifier {
   bool isLoading = true;
   bool isUpdated = false;
 
+  final storage = const FlutterSecureStorage();
+
   ProductsService() {
     loadProducts();
   }
@@ -21,7 +25,8 @@ class ProductsService extends ChangeNotifier {
   Future<List<Product>> loadProducts() async {
     isLoading = true;
     notifyListeners();
-    final url = Uri.https(_baseUrl, 'products.json');
+    final url = Uri.https(_baseUrl, 'products.json',
+        {'auth': await storage.read(key: 'idToken') ?? ''});
     final res = await http.get(url);
 
     final Map<String, dynamic> productMap = json.decode(res.body);
@@ -54,7 +59,8 @@ class ProductsService extends ChangeNotifier {
   }
 
   Future<String> updateProduct(Product product) async {
-    final url = Uri.https(_baseUrl, 'products/${product.id}.json');
+    final url = Uri.https(_baseUrl, 'products/${product.id}.json',
+        {'auth': await storage.read(key: 'idToken') ?? ''});
     await http.put(url, body: product.toRawJson());
 
     final index = products.indexWhere((element) => element.id == product.id);
@@ -64,7 +70,8 @@ class ProductsService extends ChangeNotifier {
   }
 
   Future<String> createProduct(Product product) async {
-    final url = Uri.https(_baseUrl, 'products.json');
+    final url = Uri.https(_baseUrl, 'products.json',
+        {'auth': await storage.read(key: 'idToken') ?? ''});
     final res = await http.post(url, body: product.toRawJson());
     final decodeData = json.decode(res.body);
 
